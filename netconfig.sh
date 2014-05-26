@@ -9,13 +9,20 @@ function static {
 	if [ $? -eq 0 ] ; then
 		echo "there is a network configured with dhcp which should configure your gateway"
 	else
-		read -r -p "Gateway: " gate
-		if [ $? -eq 0 ] ; then
-			sed -i -e 's#^\(GATEWAY=\).*$#\1'"${gate}"'#' /etc/sysconfig/network
+		gate=`grep GATE /etc/sysconfig/network | cut -d'=' -f 2`
+		read -r -p "Gateway: [${gate}]" gate
+		if [ -z "${gate}" ] ; then
+			echo "Not changing gateway"
 		else
-			echo "GATEWAY=\"${gate}\"" >>/etc/sysconfig/network
+			grep GATE /etc/sysconfig/network 2>/dev/null >/dev/null
+			if [ $? -eq 0 ] ; then
+				sed -i -e 's#^\(GATEWAY=\).*$#\1'"${gate}"'#' /etc/sysconfig/network
+			else
+				echo "GATEWAY=\"${gate}\"" >>/etc/sysconfig/network
+			fi
 		fi
 	fi
+
 	mac=`ifconfig ${iface} | grep eth | awk '{ print $5}'`
 	if [ -f /etc/sysconfig/network-scripts/ifcfg-${iface} ]; then
 		rm -r /etc/sysconfig/network-scripts/ifcfg-${iface}
