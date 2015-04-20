@@ -13,3 +13,4 @@ __file="${__dir}/$(basename "${BASH_SOURCE[0]}")"
 __base="$(basename ${__file} .sh)"
 
 arg1="${1:-}"
+echo $arg1
